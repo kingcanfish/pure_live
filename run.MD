@@ -37,3 +37,23 @@ dart run dmg --no-sign --no-notarization
 ```
 
 > 参考链接：https://pub.dev/packages/dmg
+
+### Linux 打包
+
+```shell
+flutter build linux --release
+```
+
+如果想打包 deb/rpm/pacman/appimage，则需要先安装系统依赖：
+
+```shell
+# Ubuntu/Debian
+sudo apt-get install -y rpm libgtk-3-dev libwebkit2gtk-4.1-dev libmpv-dev
+```
+
+然后使用 fastforge 打包：
+
+```shell
+dart pub global activate fastforge
+fastforge package --platform linux --targets deb,rpm,pacman,appimage
+```
