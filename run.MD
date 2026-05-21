@@ -48,7 +48,7 @@ flutter build linux --release
 
 ```shell
 # Ubuntu/Debian
-sudo apt-get install -y rpm libgtk-3-dev libwebkit2gtk-4.1-dev libmpv-dev
+sudo apt-get install -y rpm libgtk-3-dev libwebkit2gtk-4.1-dev libwpewebkit-1.0-dev libmpv-dev
 ```
 
 然后使用 fastforge 打包：

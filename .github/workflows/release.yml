@@ -316,7 +316,7 @@ jobs:
             libgtk-3-dev liblzma-dev libgcrypt20-dev libsystemd-dev \
             libmpv-dev libavcodec-dev libavformat-dev libavdevice-dev \
             libswscale-dev libavfilter-dev \
-            libwebkit2gtk-4.1-dev \
+            libwebkit2gtk-4.1-dev libwpewebkit-1.0-dev \
             rpm
 
       - name: 设置Flutter环境
