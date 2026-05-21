@@ -305,25 +305,9 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        branch: [master, fvp]
-
     steps:
       - name: 签出代码
         uses: actions/checkout@v4
-        with:
-          ref: ${{ matrix.branch }}
-
-      - name: Set suffix
-        id: suffix
-        shell: bash
-        run: |
-          if [ "${{ matrix.branch }}" = "fvp" ]; then
-            echo "suffix=-fvp" >> $GITHUB_OUTPUT
-          else
-            echo "suffix=" >> $GITHUB_OUTPUT
-          fi
 
       - name: Install system dependencies
         run: |
@@ -350,12 +334,6 @@ jobs:
       - name: Build Linux
         run: flutter build linux --release
 
-      - name: Get version
-        id: get_version
-        run: |
-          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //; s/[`"'"'"']//g')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
       - name: Install fastforge
         run: dart pub global activate fastforge
 
@@ -365,21 +343,19 @@ jobs:
       - name: Rename packages
         shell: bash
         run: |
-          VERSION="${{ steps.get_version.outputs.version }}"
-          SUFFIX="${{ steps.suffix.outputs.suffix }}"
           DIST_DIR="dist"
 
-          if [ -f "$DIST_DIR"/*.deb ]; then
+          if ls "$DIST_DIR"/*.deb 1>/dev/null 2>&1; then
             for f in "$DIST_DIR"/*.deb; do
               BASENAME=$(basename "$f" .deb)
-              mv "$f" "${BASENAME}${SUFFIX}-linux-x64.deb"
+              mv "$f" "${BASENAME}-linux-x64.deb"
             done
           fi
 
-          if [ -f "$DIST_DIR"/*.rpm ]; then
+          if ls "$DIST_DIR"/*.rpm 1>/dev/null 2>&1; then
             for f in "$DIST_DIR"/*.rpm; do
               BASENAME=$(basename "$f" .rpm)
-              mv "$f" "${BASENAME}${SUFFIX}-linux-x64.rpm"
+              mv "$f" "${BASENAME}-linux-x64.rpm"
             done
           fi
 
@@ -387,21 +363,21 @@ jobs:
             for f in "$DIST_DIR"/*.pkg.tar.*; do
               BASENAME="${f%.pkg.tar.*}"
               EXT="${f##*.pkg.tar.}"
-              mv "$f" "${BASENAME}${SUFFIX}-linux-x64.pkg.tar.${EXT}"
+              mv "$f" "${BASENAME}-linux-x64.pkg.tar.${EXT}"
             done
           fi
 
-          if [ -f "$DIST_DIR"/*.AppImage ]; then
+          if ls "$DIST_DIR"/*.AppImage 1>/dev/null 2>&1; then
             for f in "$DIST_DIR"/*.AppImage; do
               BASENAME=$(basename "$f" .AppImage)
-              mv "$f" "${BASENAME}${SUFFIX}-linux-x64.AppImage"
+              mv "$f" "${BASENAME}-linux-x64.AppImage"
             done
           fi
 
       - name: 上传 Linux 安装包
         uses: actions/upload-artifact@v4
         with:
-          name: linux-packages-${{ matrix.branch }}
+          name: linux-packages
           path: |
             dist/*.deb
             dist/*.rpm
@@ -511,15 +487,10 @@ jobs:
             artifacts/macos-dmg-master/*.dmg
             artifacts/macos-dmg-fvp/*.dmg
 
-            artifacts/linux-packages-master/*.deb
-            artifacts/linux-packages-master/*.rpm
-            artifacts/linux-packages-master/*.pkg.tar.*
-            artifacts/linux-packages-master/*.AppImage
-
-            artifacts/linux-packages-fvp/*.deb
-            artifacts/linux-packages-fvp/*.rpm
-            artifacts/linux-packages-fvp/*.pkg.tar.*
-            artifacts/linux-packages-fvp/*.AppImage
+            artifacts/linux-packages/*.deb
+            artifacts/linux-packages/*.rpm
+            artifacts/linux-packages/*.pkg.tar.*
+            artifacts/linux-packages/*.AppImage
 
       - name: 输出状态
         if: always()
