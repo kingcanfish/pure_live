@@ -190,13 +190,11 @@ class LivePlayController extends StateController with GetSingleTickerProviderSta
   }) async {
     final roomId = detail.value?.roomId;
     if (roomId == null) return LiveRoom();
-    log('Enter Room => roomId: $roomId');
     var liveRoom = await currentSite.liveSite.getRoomDetail(roomId: roomId, platform: detail.value!.platform!);
-
     // ================= IPTV =================
     if (isIptv) {
-      liveRoom = liveRoom.copyWith(title: detail.value!.title!, nick: detail.value!.nick!);
-
+      detail.value = null;
+      detail.value = liveRoom;
       _initIptvPlayer();
       return detail.value!;
     }
@@ -275,7 +273,7 @@ class LivePlayController extends StateController with GetSingleTickerProviderSta
   // ================= IPTV =================
   void _initIptvPlayer() {
     final link = detail.value?.link;
-    log(' IPTV link: ${detail.value?.cover}');
+    log(' IPTV link: ${detail.value?.link}');
     if (link == null || link.isEmpty) {
       ToastUtil.show(i18n('invalid_play_url'));
       return;
@@ -534,5 +532,16 @@ class LivePlayController extends StateController with GetSingleTickerProviderSta
       ToastUtil.show(i18n('open_app_failed_fallback_browser'));
       await launchUrlString(webUrl, mode: LaunchMode.externalApplication);
     }
+  }
+
+  void switchPlayUrl(String catchupUrl) {
+    var room = detail.value!;
+    room = room.copyWith(link: catchupUrl);
+    detail.value = null;
+    videoController.value = null;
+    success.value = false;
+    playUrls.value = [];
+    playUrls.add(catchupUrl);
+    setPlayer();
   }
 }
